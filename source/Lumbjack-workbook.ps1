@@ -21,7 +21,7 @@ function ConvertFrom-UnixEpoch {
 }
 
 #Get the log file
-$log = Get-Content 'C:\Users\ZacharyMaynard\Downloads\squid_access.log'
+$log = Get-Content 'C:\Users\zach\Downloads\squid_access.log'
 
 #Import Schema
 $schema = Import-PowerShellDataFile -Path .\Templates\lumberjack-squid-access.psd1
