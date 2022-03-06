@@ -50,7 +50,7 @@
             Header = 'HierarchyCode'
             DataType = 'string'
             Format = ''
-            SpecialDelimiter = ' - '
+            SpecialDelimiter = '\-\s+'
         }
 
         Field9 = @{
