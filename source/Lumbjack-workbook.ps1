@@ -31,15 +31,12 @@ $FieldCount = $schema.Fields.count
 #Output object
 [System.Collections.ArrayList]$logOutput = @()
 
-
 for ($i = 0; $i -lt $log.Count; $i++) {
 
 
     $currentEntry = [PSCustomObject]@{
         ID = $i
     }
-
-    $OffsetTrack = 0
 
     for ($j = 1; $j -le $FieldCount; $j++) {
 
@@ -61,12 +58,17 @@ for ($i = 0; $i -lt $log.Count; $i++) {
 
             #Now lookahead and split by the next delimiter
             if ($NextSpecialDelimiter) {
+
                 $split = ($split -split "$NextSpecialDelimiter",2)[0]
+
             }
 
             else {
+                
                 $split = ($split -split "$Delimiter",2)[0]
+
             }
+
         }
 
         #Split handling for fields that use the normal delimiter
@@ -80,7 +82,9 @@ for ($i = 0; $i -lt $log.Count; $i++) {
             time {  
 
                 if ($schema.Fields.$FieldKey.Format -eq 'epoch-linux') {
+
                     $split = ConvertFrom-UnixEpoch -EpochTime $split
+
                 }
                 
             }
@@ -88,7 +92,9 @@ for ($i = 0; $i -lt $log.Count; $i++) {
         }
 
         if ($Header -ne 'Skip') {
+
             $currentEntry | Add-Member -MemberType NoteProperty -Name $Header -Value $split 
+
         }
             
     }
