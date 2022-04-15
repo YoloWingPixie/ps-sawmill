@@ -46,6 +46,7 @@
             Format = ''
             CaptureMode = 1
             SpecialDelimiter = 'Sender: '
+            Trim = ' |'
         }
 
         Field2 = @{

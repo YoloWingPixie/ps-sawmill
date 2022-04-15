@@ -57,6 +57,8 @@ function Read-SmLog {
                 $FieldCount
             )
 
+            $split = $LogLine
+
             if ($SpecialDelimiter) {
         
                 #Get the last split to ensure we are looking at the correct part of the log, unless beginning of log.
@@ -209,8 +211,6 @@ function Read-SmLog {
     }
     
     end {
-
         return ,$logOutput
-
     }
 }
