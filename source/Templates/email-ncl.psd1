@@ -41,31 +41,35 @@
     Fields = @{
 
         Field1 = @{
-            Header = 'Time'
-            DataType = 'time'
-            Format = 'epoch-linux'
+            Header = 'To'
+            DataType = 'String'
+            Format = ''
             CaptureMode = 1
+            SpecialDelimiter = '|'
         }
 
         Field2 = @{
-            Header = 'Host'
+            Header = 'From'
             DataType = 'string'
             Format = ''
-            CaptureMode = 0
+            CaptureMode = 1
+            SpecialDelimiter = '|'
         }
 
         Field3 = @{
-            Header = 'ID'
+            Header = 'CC'
             DataType = 'string'
             Format = ''
             CaptureMode = 1
+            SpecialDelimiter = '|'
         }
 
         Field4 = @{
-            Header = 'Message'
+            Header = 'BCC'
             DataType = 'string'
             Format = ''
             CaptureMode = 1
+            SpecialDelimiter = '|'
         }
     }
 }

@@ -43,26 +43,33 @@
         Field1 = @{
             Header = 'Time'
             DataType = 'time'
-            Format = 'epoch-linux'
+            Format = 'Date'
             CaptureMode = 1
         }
 
         Field2 = @{
-            Header = 'Host'
+            Header = 'Device'
             DataType = 'string'
             Format = ''
-            CaptureMode = 0
+            CaptureMode = 1
         }
 
         Field3 = @{
-            Header = 'ID'
+            Header = 'Sensor'
             DataType = 'string'
             Format = ''
             CaptureMode = 1
         }
 
         Field4 = @{
-            Header = 'Message'
+            Header = 'Value'
+            DataType = 'percent'
+            Format = ''
+            CaptureMode = 1
+        }
+
+        Field5 = @{
+            Header = 'Reading'
             DataType = 'string'
             Format = ''
             CaptureMode = 1
