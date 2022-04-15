@@ -51,37 +51,48 @@ function Read-SmLog {
             param (
                 $SpecialDelimiter,
                 $Delimiter,
-                $LogLine
+                $LogLine,
+                $NextSpecialDelimiter,
+                $Field,
+                $FieldCount
             )
 
             if ($SpecialDelimiter) {
         
-                #Get the last split to ensure we are looking at the correct part of the log
-                $split = ($LogLine -split "$Delimiter",($j-1))[-1]
+                #Get the last split to ensure we are looking at the correct part of the log, unless beginning of log.
+                if ($Field -ne 1) {
+                    $split = ($LogLine -split "$Delimiter",($j-1))[-1]                   
+                }
     
                 #Split by the special delimiter
                 $split = ($split -split "$SpecialDelimiter",2)[-1]
     
-                #Now lookahead and split by the next delimiter
-                if ($NextSpecialDelimiter) {
+                #Now lookahead and split by the next delimiter, unless final field
+                
+                if ($Field -ne $FieldCount) {
+
+                    if ($NextSpecialDelimiter) {
     
-                    $split = ($split -split "$NextSpecialDelimiter",2)[0]
-    
-                }
-    
-                else {
+                        $split = ($split -split "$NextSpecialDelimiter",2)[0]
+        
+                    }
+        
+                    else {
+                        
+                        $split = ($split -split "$Delimiter",2)[0]
+        
+                    }
                     
-                    $split = ($split -split "$Delimiter",2)[0]
-    
                 }
     
             }
     
             #Split handling for fields that use the normal delimiter
             else {
-                
-                $split = ($LogLine -split "$Delimiter")[$j - 1]
-    
+
+                if ($Field -ne $FieldCount) {
+                    $split = ($LogLine -split "$Delimiter")[$j - 1]
+                }
             }
 
             return $split
@@ -112,12 +123,25 @@ function Read-SmLog {
     }
     
     process {
+
+        #Write-Progress Variables
+        #Write-Progress is designed to update at only whole percents of completion for performance.
+        #Updating Write-Progess in every loop increases script runtime by an order of magnitude
+        $totalDone=1
+        $finalCount = $logContent.count
+        $progressUpdate = [math]::floor($finalCount / 100)
+        $progressCheck = $progressUpdate+1
         
         for ($i = 0; $i -lt $logContent.Count; $i++) {
-            [int]$percent = ($i / $logContent.Count) * 100
-            Write-Progress -Activity "Ingesting $LogPath" -Status ("Processing $i of" + $logContent.Count) -PercentComplete $percent
 
-
+            #Write-Progress Loop
+            $totalDone += 1
+            if ($progressCheck -gt $progressUpdate){
+                Write-Progress -Activity "$totalDone out of $finalCount completed" -PercentComplete (($totalDone / $finalCount) * 100)
+                $progressCheck = 0
+            }
+            $progressCheck += 1
+            
             #Initialize the current log row's object and set ID.
             $currentEntry = [PSCustomObject]@{
                 ID = $i
@@ -132,12 +156,15 @@ function Read-SmLog {
                 $SpecialDelimiter = $schema.Fields.$FieldKey.SpecialDelimiter
                 $NextSpecialDelimiter = $schema.Fields.$NextField.SpecialDelimiter
                 $Mode = $schema.Fields.$FieldKey.CaptureMode
+                $Trim = $schema.Fields.$FieldKey.Trim
         
 
                 switch ($Mode) {
-                    0 { condition }
+                    0 {  
+                        #Not Implemented yet
+                    }
                     1 {
-                        $split = Get-FieldByDelimiter -SpecialDelimiter $SpecialDelimiter -Delimiter $Delimiter -LogLine $logContent[$i]
+                        $split = Get-FieldByDelimiter -Field $j -SpecialDelimiter $SpecialDelimiter -Delimiter $Delimiter -LogLine $logContent[$i] -NextSpecialDelimiter $NextSpecialDelimiter -FieldCount $FieldCount
                     }
                 }
 
@@ -162,6 +189,9 @@ function Read-SmLog {
 
                     Default {}
                 }
+
+                #And finally complete trim operation on the field if it exists
+                $split = $split.Trim($Trim)
         
                 if ($Header -ne 'Skip') {
         
@@ -171,7 +201,6 @@ function Read-SmLog {
                     
             }
         
-            
             #Output the current row object to the return array
             $logOutput.Add($currentEntry) | Out-Null
         

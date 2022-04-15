@@ -41,19 +41,20 @@
     Fields = @{
 
         Field1 = @{
-            Header = 'To'
+            Header = 'From'
             DataType = 'String'
             Format = ''
             CaptureMode = 1
-            SpecialDelimiter = '|'
+            SpecialDelimiter = 'Sender: '
         }
 
         Field2 = @{
-            Header = 'From'
+            Header = 'To'
             DataType = 'string'
             Format = ''
             CaptureMode = 1
-            SpecialDelimiter = '|'
+            SpecialDelimiter = 'Receiver: '
+            Trim = ' |'
         }
 
         Field3 = @{
@@ -61,7 +62,8 @@
             DataType = 'string'
             Format = ''
             CaptureMode = 1
-            SpecialDelimiter = '|'
+            SpecialDelimiter = 'CC: '
+            Trim = ' |'
         }
 
         Field4 = @{
@@ -69,7 +71,7 @@
             DataType = 'string'
             Format = ''
             CaptureMode = 1
-            SpecialDelimiter = '|'
+            SpecialDelimiter = 'BCC: '
         }
     }
 }
