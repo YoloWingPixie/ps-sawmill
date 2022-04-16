@@ -59,6 +59,7 @@ function Read-SmLog {
 
             $split = $LogLine
 
+            #Split handling for fields that use a special delimiter
             if ($SpecialDelimiter) {
         
                 #Get the last split to ensure we are looking at the correct part of the log, unless beginning of log.
@@ -69,45 +70,33 @@ function Read-SmLog {
                 #Split by the special delimiter
                 $split = ($split -split "$SpecialDelimiter",2)[-1]
     
-                #Now lookahead and split by the next delimiter, unless final field
-                
+                #Now lookahead and split by the next delimiter, unless on final field
                 if ($Field -ne $FieldCount) {
 
                     if ($NextSpecialDelimiter) {
-    
                         $split = ($split -split "$NextSpecialDelimiter",2)[0]
-        
                     }
-        
-                    else {
-                        
+                    else {   
                         $split = ($split -split "$Delimiter",2)[0]
-        
-                    }
-                    
+                    }  
                 }
-    
             }
-    
             #Split handling for fields that use the normal delimiter
             else {
-
                 if ($Field -ne $FieldCount) {
                     $split = ($LogLine -split "$Delimiter")[$j - 1]
                 }
             }
-
-            return $split
-            
+            return $split 
         }
 
         function Get-FieldByRegex {
             param (
                 $LogLine
             )
-            
         }
 
+        #Wrapper for ::FromUnixTimeSeconds to DateTime
         function ConvertFrom-UnixEpoch {
             [CmdletBinding()]
             param (
@@ -127,7 +116,9 @@ function Read-SmLog {
     process {
 
         #Write-Progress Variables
-        #Write-Progress is designed to update at only whole percents of completion for performance.
+        #Write-Progress is designed to update at only whole percents of completion for performance. 
+        #$progressUpdate is equal to 1 of 100 equal counts of log lines.
+        #In the for loop, we count up from 0 to $progressUpdate. When hit, Write-Progress runs and the counter resets to 0.
         #Updating Write-Progess in every loop increases script runtime by an order of magnitude
         $totalDone=1
         $finalCount = $logContent.count
@@ -149,6 +140,7 @@ function Read-SmLog {
                 ID = $i
             }
         
+            #Inner loop to process each field of the log row.
             for ($j = 1; $j -le $FieldCount; $j++) {
         
                 $FieldKey = "Field" + $j.ToString()
@@ -160,7 +152,10 @@ function Read-SmLog {
                 $Mode = $schema.Fields.$FieldKey.CaptureMode
                 $Trim = $schema.Fields.$FieldKey.Trim
         
-
+                #Mode used to split the delimiter.
+                # 0 - Regex
+                # 1 - Delimiter
+                # 2 - Synthetic Lookup
                 switch ($Mode) {
                     0 {  
                         #Not Implemented yet
@@ -168,18 +163,20 @@ function Read-SmLog {
                     1 {
                         $split = Get-FieldByDelimiter -Field $j -SpecialDelimiter $SpecialDelimiter -Delimiter $Delimiter -LogLine $logContent[$i] -NextSpecialDelimiter $NextSpecialDelimiter -FieldCount $FieldCount
                     }
+                    2 {
+                        #Not Implemented yet
+                    }
                 }
 
                 #Format Data
+                #This should probably be a separate function for maintainability
                 switch ($schema.Fields.$FieldKey.DataType) {
                     time {  
-        
+                        #   epoch-linux
                         if ($schema.Fields.$FieldKey.Format -eq 'epoch-linux') {
-        
                             $split = ConvertFrom-UnixEpoch -EpochTime $split
-        
                         }
-
+                        #   Date
                         if ($schema.Fields.$FieldKey.Format -eq 'Date') {
                             $split = Get-Date $split -Format 'yyyy-MM-dd'
                         }
@@ -188,7 +185,6 @@ function Read-SmLog {
                     percent {
                         $split = $split.Trim('%')
                     }
-
                     Default {}
                 }
 
@@ -196,14 +192,12 @@ function Read-SmLog {
                 $split = $split.Trim($Trim)
         
                 if ($Header -ne 'Skip') {
-        
                     $currentEntry | Add-Member -MemberType NoteProperty -Name $Header -Value $split 
-        
                 }
                     
             }
         
-            #Output the current row object to the return array
+            #Output the current row object to the output arraylist
             $logOutput.Add($currentEntry) | Out-Null
         
         }
