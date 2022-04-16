@@ -3,7 +3,24 @@ Powershell module to process text logs into Powershell Objects
 
 # Date Types
 
+Data Types are formatting keywords declared in a schema file that Sawmill will use to determine what text processing needs to be done on a field.
+
+```powershell
+        Field1 = @{
+            Header = 'Time'
+            DataType = 'Time'
+            Format = 'epoch-linux'
+        }
+```
+
+Data types can also have a format. A format is the display format of the field within the text log, not the output format.
+
 ## Time
+
+Outputs in DateTime: 1650120606 -> Saturday, April 16, 2022 2:50:06 PM
+
+This is a .NET/Powershell DateTime object, so it's display format can be changed later on the fly using its builtin methods.
+
 
 Formats:
 ### epoch-linux
@@ -12,12 +29,12 @@ Converts time from epoch-linux to DateTime
 
 ### Date
 
-Converts time from any time to yyyy-MM-dd mask.
+Converts time from yyyy-MM-dd format to DateTime
 
 ### DateMask
 ***NOT IMPLEMENTED YET***
 
-Declare an arbitrary mask for date which Read-SmLog will interpret and convert time to the mask values:
+Declare an arbitrary mask for date which Read-SmLog will interpret and convert time from the mask to DateTime:
 
     - yyyy-MM-dd              = 1990-06-15
 
